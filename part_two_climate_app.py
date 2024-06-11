@@ -37,7 +37,7 @@ app = Flask(__name__)
 #################################################
 # Flask Routes
 #################################################
-
+#ROUTES - confirm queries use same variables as .ipynb file in part 1
 @app.route("/")
 def welcome():
     return (
@@ -50,7 +50,6 @@ def welcome():
         f"/api/v1.0/<start>/<end><br/>"
     )
 
-#ROUTES - confirm queries use same variables as .ipynb file in part 1
 # Stations route
 @app.route("/api/v1.0/precipitation")
 def precipitation():
@@ -66,7 +65,7 @@ def precipitation():
 
     # Convert query results to a dictionary
     precipitation_dict = {date: prcp for date, prcp in precipitation_data}
-
+    # Return the data as json
     return jsonify(precipitation_dict)
 
 # Stations route
@@ -77,7 +76,7 @@ def stations():
 
     # Convert the query results to a list
     stations_list = [station[0] for station in stations_data]
-
+    # Return the data as json
     return jsonify(stations_list)
 
 # TOBS route
@@ -101,7 +100,7 @@ def tobs():
 
     # Convert the query results to a list of temperatures
     temperature_list = [temp for date, temp in temperature_data]
-
+    # Return the data as json
     return jsonify(temperature_list)
 
 # Start and Start-End route
@@ -112,25 +111,27 @@ def temperature_stats(start, end=None):
     if end:
         results = session.query(
             func.min(Measurement.tobs).label('min_temp'),
-            func.avg(Measurement.tobs).label('avg_temp'),
-            func.max(Measurement.tobs).label('max_temp')
+            func.max(Measurement.tobs).label('max_temp'),
+            func.avg(Measurement.tobs).label('avg_temp')
         ).filter(Measurement.date >= start).filter(Measurement.date <= end).all()
     else:
         results = session.query(
             func.min(Measurement.tobs).label('min_temp'),
-            func.avg(Measurement.tobs).label('avg_temp'),
-            func.max(Measurement.tobs).label('max_temp')
+            func.max(Measurement.tobs).label('max_temp'),
+            func.avg(Measurement.tobs).label('avg_temp')
         ).filter(Measurement.date >= start).all()
 
     # Convert the query results to a dictionary
     temperature_stats = {
-        "TMIN": results[0].min_temp,
-        "TAVG": results[0].avg_temp,
-        "TMAX": results[0].max_temp
+        "Minimum Temperature": results[0].min_temp,
+        "Maximum Temperature": results[0].max_temp,
+        "Average Temperature": results[0].avg_temp,
     }
-
+    # Return the data as json
     return jsonify(temperature_stats)
 
 # Run the Flask app
 if __name__ == "__main__":
     app.run(debug=True)
+
+session.close()
